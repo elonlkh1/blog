@@ -9,13 +9,13 @@ const routes = require('./routes/index');
 const users = require('./routes/users');
 const session = require('express-session');
 const RedisStore = require('connect-redis')(session);
-const flash=require('connect-flash');
+const flash = require('connect-flash');
 
 const app = express();
 
 
 app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
+app.set('view engine', 'ejs');
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
@@ -23,6 +23,17 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(session(config.session));
 app.use(flash());
+app.locals.blog = {
+    title: pkg.name,
+    description: pkg.description
+}
+app.use(function (req, res, next) {
+    res.locals.user = req.session.user;
+    req.locals.success = req.flash('success').toString();
+    res.locals.error = req.flash('error').toString();
+    next();
+});
+
 
 app.use('/', routes);
 app.use('/users', users);
